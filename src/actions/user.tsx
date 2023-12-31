@@ -1,6 +1,7 @@
 "use server";
 
 import { getProfileByUsername as getProfile } from "~/db/user/get-profile-by-username";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { deleteUser as destroy } from "~/db/user/delete-user";
 import { updateUser as update } from "~/db/user/update-user";
 import { getUsers } from "~/db/user/get-users";
@@ -59,9 +60,10 @@ export async function updateUser(data: ProfileOutput) {
   try {
     await update(session.user, parse.output);
   } catch (error) {
-    // PrismaClientKnownRequestError - gives error on edge runtime
-    if ((error as { code: string }).code === "P2002") {
-      return { error: "Username already taken" };
+    if (error instanceof PrismaClientKnownRequestError) {
+      if (error.code === "P2002") {
+        return { error: "Username already taken" };
+      }
     }
 
     console.error(error);
