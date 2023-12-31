@@ -26,9 +26,11 @@ export async function deleteUser() {
   try {
     await destroy(session?.user?.id);
 
-    cookies().delete(`authjs.session-token`);
-    cookies().delete(`authjs.callback-url`);
-    cookies().delete(`authjs.csrf-token`);
+    if (process.env.NODE_ENV === "production") {
+      cookies().delete(`__Host-authjs.session-token`);
+      cookies().delete(`__Secure-authjs.callback-url`);
+      cookies().delete(`__Secure-authjs.csrf-token`);
+    }
   } catch (error) {
     console.error(error);
     return { error: "There was an error deleting your account" };
