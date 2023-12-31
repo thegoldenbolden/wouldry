@@ -31,7 +31,7 @@ model Account {
 
   @@unique([provider, providerAccountId])
   @@index([userId])
-  @@map(name: "accounts")
+  @@map(name: "account")
 }
 
 model Choice {
