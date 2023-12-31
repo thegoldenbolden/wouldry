@@ -1,6 +1,7 @@
 "use server";
 
 import { getProfileByUsername as getProfile } from "~/db/user/get-profile-by-username";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { deleteUser as destroy } from "~/db/user/delete-user";
 import { updateUser as update } from "~/db/user/update-user";
 import { getUsers } from "~/db/user/get-users";
@@ -26,9 +27,11 @@ export async function deleteUser() {
   try {
     await destroy(session?.user?.id);
 
-    cookies().delete(`authjs.session-token`);
-    cookies().delete(`authjs.callback-url`);
-    cookies().delete(`authjs.csrf-token`);
+    if (process.env.NODE_ENV === "production") {
+      cookies().delete(`__Host-authjs.session-token`);
+      cookies().delete(`__Secure-authjs.callback-url`);
+      cookies().delete(`__Secure-authjs.csrf-token`);
+    }
   } catch (error) {
     console.error(error);
     return { error: "There was an error deleting your account" };
@@ -57,9 +60,10 @@ export async function updateUser(data: ProfileOutput) {
   try {
     await update(session.user, parse.output);
   } catch (error) {
-    // PrismaClientKnownRequestError - gives error on edge runtime
-    if ((error as { code: string }).code === "P2002") {
-      return { error: "Username already taken" };
+    if (error instanceof PrismaClientKnownRequestError) {
+      if (error.code === "P2002") {
+        return { error: "Username already taken" };
+      }
     }
 
     console.error(error);
