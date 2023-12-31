@@ -4,11 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npx prisma generate --no-engine && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "prepare": "husky install",
-    "postinstall": "prisma generate --no-engine",
+    "postinstall": "prisma generate",
     "db:push": "dotenv -e .env.development -- npx prisma db push",
     "prettier": "prettier --write ./src"
   },
