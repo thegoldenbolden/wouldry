@@ -5,8 +5,6 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import "./globals.css";
 
-export const runtime = "edge";
-
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL),
   title: "Wouldry",
