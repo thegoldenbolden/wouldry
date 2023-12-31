@@ -2,14 +2,73 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: 0 0% 100%;
-  --foreground: 0 0% 0%;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: 0 0% 0%;
-    --foreground: 0 0% 100%;
+    --primary: 210 100% 56%;
+    --primary-content: 0 0% 100%;
+    --primary-dark: 210 100% 46%;
+    --primary-light: 210 100% 66%;
+
+    --secondary: 13 100% 56%;
+    --secondary-content: 0 0% 100%;
+    --secondary-dark: 13 100% 46%;
+    --secondary-light: 13 100% 66%;
+
+    --background: 180 3% 94%;
+    --foreground: 0 0% 98%;
+    --border: 220 5% 67%;
+
+    --copy: 210 5% 15%;
+    --copy-light: 210 5% 40%;
+    --copy-lighter: 213 5% 55%;
+
+    --success: 120 100% 56%;
+    --warning: 60 100% 56%;
+    --danger: 0 100% 56%;
+    --error: 45 100% 50%;
+
+    --success-content: 120 100% 6%;
+    --warning-content: 60 100% 6%;
+    --danger-content: 0 0% 100%;
+    --error-content: 45 100% 15%;
+
+    --rather-blue: 210 100% 56%;
+    --rather-blue-content: 0 0% 100%;
+    --rather-red: 352 82% 47%;
+    --rather-red-content: 0 0% 100%;
+  }
+
+  .dark {
+    --primary: 210 100% 56%;
+    --primary-content: 0 0% 100%;
+    --primary-dark: 210 100% 46%;
+    --primary-light: 210 100% 66%;
+
+    --secondary: 13 100% 56%;
+    --secondary-content: 0 0% 100%;
+    --secondary-dark: 13 100% 46%;
+    --secondary-light: 13 100% 66%;
+
+    --background: 200 6% 10%;
+    --foreground: 210 5% 15%;
+    --border: 210 5% 25%;
+
+    --copy: 0 0% 98%;
+    --copy-light: 210 5% 85%;
+    --copy-lighter: 207 5% 65%;
+
+    --success: 120 100% 56%;
+    --warning: 60 100% 56%;
+    --danger: 0 100% 56%;
+    --error: 45 100% 50%;
+
+    --success-content: 120 100% 6%;
+    --warning-content: 60 100% 6%;
+    --danger-content: 0 0% 100%;
+    --error-content: 45 100% 95%;
+  }
+
+  :disabled [aria-disabled="true"] {
+    cursor: not-allowed;
   }
 }
