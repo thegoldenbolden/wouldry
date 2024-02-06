@@ -1,14 +1,5 @@
-import { MAX_COMMENTS_PER_PAGE, MIN_COMMENTS_PER_PAGE } from "~/lib/constants";
-import { ProfileSchema } from "~/lib/validate/user";
-
 import {
-  SearchParamsSchema,
-  maxErrorMessage,
-  minErrorMessage,
-} from "~/lib/validate";
-
-import {
-  type Output,
+  Input,
   coerce,
   maxLength,
   maxValue,
@@ -21,8 +12,19 @@ import {
   optional,
   regex,
   string,
+  toLowerCase,
   toTrimmed,
+  type Output,
 } from "valibot";
+import {
+  SearchSchema as BaseSearchSchema,
+  maxErrorMessage,
+  minErrorMessage,
+} from "~/db/validations";
+import { fields as user } from "./user";
+
+export const MAX_COMMENTS_PER_PAGE = 24;
+export const MIN_COMMENTS_PER_PAGE = 12;
 
 export const fields = {
   body: {
@@ -43,13 +45,9 @@ export const fields = {
   },
 } as const;
 
-export const CommentIdSchema = object({
-  id: string([regex(/\w{12}/)]),
-});
-
 export const CreateCommentSchema = object({
   contentId: string(),
-  parentId: optional(CommentIdSchema.entries.id),
+  parentId: optional(string()),
   body: string([
     toTrimmed(),
     minLength(fields.body.min, minErrorMessage(fields.body.min)),
@@ -59,13 +57,24 @@ export const CreateCommentSchema = object({
 });
 
 export const SearchSchema = merge([
-  SearchParamsSchema,
+  BaseSearchSchema,
   object({
     contentId: string(),
-    parentId: optional(nullable(CommentIdSchema.entries.id), null),
-    before: optional(nullable(CommentIdSchema.entries.id), null),
-    after: optional(nullable(CommentIdSchema.entries.id), null),
-    username: optional(ProfileSchema.entries.username),
+    username: optional(
+      string([
+        toLowerCase(),
+        toTrimmed(),
+        minLength(user.username.min, minErrorMessage(user.username.min)),
+        maxLength(user.username.max, maxErrorMessage(user.username.max)),
+        regex(
+          user.username.regex,
+          "Username must contain alphanumeric characters or underscores and start/end with a letter or number",
+        ),
+      ]),
+    ),
+    parentId: optional(nullable(string()), null),
+    before: optional(nullable(string()), null),
+    after: optional(nullable(string()), null),
     limit: optional(
       coerce(
         number([
@@ -80,11 +89,11 @@ export const SearchSchema = merge([
 ]);
 
 export const DeleteCommentSchema = object({
-  commentId: CommentIdSchema.entries.id,
+  commentId: string(),
   forumId: string(),
 });
 
 export type CreateCommentOutput = Output<typeof CreateCommentSchema>;
-export type DeleteCommentOutput = Output<typeof DeleteCommentSchema>;
-export type CommentIdOutput = Output<typeof CommentIdSchema>;
 export type SearchOutput = Output<typeof SearchSchema>;
+export type DeleteCommentInput = Input<typeof DeleteCommentSchema>;
+export type DeleteCommentOutput = Output<typeof DeleteCommentSchema>;

@@ -1,30 +1,32 @@
 import {
-  SearchParamsSchema,
+  SearchSchema as BaseSearchSchema,
   maxErrorMessage,
   minErrorMessage,
-} from "~/lib/validate";
-import { MAX_RATHERS_PER_PAGE, MIN_RATHERS_PER_PAGE } from "~/lib/constants";
-import { ProfileSchema } from "~/lib/validate/user";
+} from "~/db/validations";
+import { fields as user } from "./user";
 
 import {
-  type Output,
   boolean,
   coerce,
   fallback,
   maxLength,
   maxValue,
+  merge,
   minLength,
   minValue,
-  merge,
   number,
   object,
   optional,
   regex,
   string,
+  toCustom,
   toLowerCase,
   toTrimmed,
-  toCustom,
+  type Output,
 } from "valibot";
+
+export const MAX_RATHERS_PER_PAGE = 24;
+export const MIN_RATHERS_PER_PAGE = 12;
 
 export const fields = {
   title: {
@@ -44,17 +46,17 @@ export const fields = {
     pattern: `^[a-z0-9\\-]{1,50}$`,
     tips: `Link must only contain alphanumeric characters, hypens and must be between 2-50 characters in length`,
   },
-  choice_one: {
-    name: "choice_one",
-    label: "choice one",
+  option_one: {
+    name: "option_one",
+    label: "option one",
     max: 80,
     min: 2,
     regex: /^[\w\d\-.,!?&():'" ]{1,80}$/,
     pattern: `^[a-zA-Z0-9.,!?&():'"\\- ]{1,80}$`,
   },
-  choice_two: {
-    name: "choice_two",
-    label: "choice two",
+  option_two: {
+    name: "option_two",
+    label: "option two",
     max: 80,
     min: 2,
     regex: /^[\w\d\-.,!?&():'" ]{1,80}$/,
@@ -85,21 +87,21 @@ export const CreateRatherSchema = object({
       "Valid characters: a-z A-Z 0-9 . , ! ? & ( ) : ' \" -",
     ),
   ]),
-  choice_one: string([
+  option_one: string([
     toTrimmed(),
-    minLength(fields.choice_one.min, minErrorMessage(fields.choice_one.min)),
-    maxLength(fields.choice_one.max, maxErrorMessage(fields.choice_one.max)),
+    minLength(fields.option_one.min, minErrorMessage(fields.option_one.min)),
+    maxLength(fields.option_one.max, maxErrorMessage(fields.option_one.max)),
     regex(
-      fields.choice_one.regex,
+      fields.option_one.regex,
       "Valid characters: a-z A-Z 0-9 . , ! ? & ( ) : ' \" -",
     ),
   ]),
-  choice_two: string([
+  option_two: string([
     toTrimmed(),
-    minLength(fields.choice_two.min, minErrorMessage(fields.choice_two.min)),
-    maxLength(fields.choice_two.max, maxErrorMessage(fields.choice_two.max)),
+    minLength(fields.option_two.min, minErrorMessage(fields.option_two.min)),
+    maxLength(fields.option_two.max, maxErrorMessage(fields.option_two.max)),
     regex(
-      fields.choice_two.regex,
+      fields.option_two.regex,
       "Valid characters: a-z A-Z 0-9 . , ! ? & ( ) : ' \" -",
     ),
   ]),
@@ -141,13 +143,24 @@ export const SlugSchema = object({
 
 export const CreateVoteSchema = object({
   ratherId: string(),
-  choiceId: string(),
+  optionId: string(),
 });
 
 export const SearchSchema = merge([
-  SearchParamsSchema,
+  BaseSearchSchema,
   object({
-    username: optional(ProfileSchema.entries.username),
+    username: optional(
+      string([
+        toLowerCase(),
+        toTrimmed(),
+        minLength(user.username.min, minErrorMessage(user.username.min)),
+        maxLength(user.username.max, maxErrorMessage(user.username.max)),
+        regex(
+          user.username.regex,
+          "Username must contain alphanumeric characters or underscores and start/end with a letter or number",
+        ),
+      ]),
+    ),
     limit: optional(
       coerce(
         number([
@@ -161,7 +174,7 @@ export const SearchSchema = merge([
   }),
 ]);
 
-export type SearchOutput = Output<typeof SearchSchema>;
 export type CreateRatherOutput = Output<typeof CreateRatherSchema>;
-export type CreateVoteOutput = Output<typeof CreateVoteSchema>;
 export type SlugOutput = Output<typeof SlugSchema>;
+export type CreateVoteOutput = Output<typeof CreateVoteSchema>;
+export type SearchOutput = Output<typeof SearchSchema>;
