@@ -1,74 +1,85 @@
 "use client";
 
-import { fields, ProfileSchema, type ProfileOutput } from "~/lib/validate/user";
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { Textarea } from "~/components/ui/textarea";
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { updateUser } from "~/actions/user";
-import { Save } from "~/components/icons";
+import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-
+import { updateUser } from "~/actions/user";
+import { Button } from "~/components/ui/button";
 import {
+  FieldLength,
   Form,
   FormControl,
+  FormErrorMessage,
   FormField,
   FormItem,
   FormLabel,
-  FieldLength,
-  FormErrorMessage,
 } from "~/components/ui/form";
+import { Input } from "~/components/ui/input";
+import { Textarea } from "~/components/ui/textarea";
+import {
+  UpdateUserSchema,
+  fields,
+  type UpdateUserOutput,
+} from "~/db/validations/user";
 
-export function Edit(initial: ProfileOutput) {
-  const form = useForm<ProfileOutput>({
-    resolver: valibotResolver(ProfileSchema),
+export function Edit(initial: UpdateUserOutput) {
+  const [isPending, startTransition] = useTransition();
+
+  const form = useForm<UpdateUserOutput>({
+    resolver: valibotResolver(UpdateUserSchema),
     defaultValues: {
-      biography: initial.biography,
-      display_name: initial.display_name,
+      about: initial.about,
+      nickname: initial.nickname,
       username: initial.username,
     },
   });
 
-  const pending = form.formState.isSubmitting || form.formState.isValidating;
+  const pending =
+    isPending || form.formState.isSubmitting || form.formState.isValidating;
 
-  const onSubmit = async (values: ProfileOutput) => {
-    if (pending) return;
-    toast.promise(
-      async () => {
-        const response = await updateUser(values);
+  const onSubmit = async (values: UpdateUserOutput) => {
+    startTransition(() => {
+      if (pending) {
+        return;
+      }
 
-        if (response?.error) {
-          throw { message: response.error };
-        }
-      },
-      {
-        loading: "Updating profile..",
-        success: "Successfully updated profile",
-        error(error) {
-          if (error?.message) {
-            return error.message;
+      toast.promise(
+        async () => {
+          const response = await updateUser(values);
+
+          if (response?.error) {
+            throw response.error;
           }
-          return "Failed to update profile";
         },
-      },
-    );
+        {
+          loading: "Updating profile..",
+          success: "Updated profile",
+          error(error) {
+            if (error?.message) {
+              return error.message;
+            }
+            return "Failed to update profile";
+          },
+        },
+      );
+    });
   };
 
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex flex-col gap-2 px-2 bg-inherit"
+        className="flex flex-col gap-2 bg-inherit px-2"
       >
         <FormField
           name={fields.username.name}
           control={form.control}
           render={({ field }) => {
             return (
-              <FormItem className="group flex flex-col bg-inherit gap-1.5 rounded py-2">
-                <FormLabel className="relative px-2 flex w-full items-center justify-between gap-2 uppercase tracking-widest text-copy-lighter">
-                  <span className="group-has-[input:required]:after:absolute group-has-[input:required]:after:content-['*'] group-has-[input:required]:after:text-danger group-has-[input:required]:after:ml-1">
+              <FormItem className="group flex flex-col gap-1.5 rounded bg-inherit py-2">
+                <FormLabel className="relative flex w-full items-center justify-between gap-2 px-2 uppercase tracking-widest text-foreground-lighter">
+                  <span className="group-has-[input:required]:after:absolute group-has-[input:required]:after:ml-1 group-has-[input:required]:after:text-error group-has-[input:required]:after:content-['*']">
                     {fields[field.name].label}
                   </span>
                   <FieldLength
@@ -82,7 +93,7 @@ export function Edit(initial: ProfileOutput) {
                     minLength={fields[field.name].min}
                     maxLength={fields[field.name].max}
                     placeholder="Enter a username"
-                    className="p-2 border border-border rounded-md"
+                    className="rounded-md border  border-border p-2"
                     {...field}
                   />
                 </FormControl>
@@ -92,13 +103,13 @@ export function Edit(initial: ProfileOutput) {
           }}
         />
         <FormField
-          name={fields.display_name.name}
+          name={fields.nickname.name}
           control={form.control}
           render={({ field }) => {
             return (
-              <FormItem className="group flex flex-col bg-inherit gap-1.5 rounded py-2">
-                <FormLabel className="relative px-2 flex w-full items-center justify-between gap-2 uppercase tracking-widest text-copy-lighter">
-                  <span className="group-has-[input:required]:after:absolute group-has-[input:required]:after:content-['*'] group-has-[input:required]:after:text-danger group-has-[input:required]:after:ml-1">
+              <FormItem className="group flex flex-col gap-1.5 rounded bg-inherit py-2">
+                <FormLabel className="relative flex w-full items-center justify-between gap-2 px-2 uppercase tracking-widest text-foreground-lighter">
+                  <span className="group-has-[input:required]:after:absolute group-has-[input:required]:after:ml-1 group-has-[input:required]:after:text-error group-has-[input:required]:after:content-['*']">
                     {fields[field.name].label}
                   </span>
                   <FieldLength
@@ -112,7 +123,7 @@ export function Edit(initial: ProfileOutput) {
                     minLength={fields[field.name].min}
                     maxLength={fields[field.name].max}
                     placeholder="Enter a display name"
-                    className="p-2 border border-border rounded-md"
+                    className="rounded-md border border-border p-2"
                     {...field}
                   />
                 </FormControl>
@@ -122,12 +133,12 @@ export function Edit(initial: ProfileOutput) {
           }}
         />
         <FormField
-          name={fields.biography.name}
+          name={fields.about.name}
           control={form.control}
           render={({ field }) => {
             return (
-              <FormItem className="group flex flex-col bg-inherit gap-1.5 rounded py-2">
-                <FormLabel className="relative px-2 flex w-full items-center justify-between gap-2 uppercase tracking-widest text-copy-lighter">
+              <FormItem className="group flex flex-col gap-1.5 rounded bg-inherit py-2">
+                <FormLabel className="relative flex w-full items-center justify-between gap-2 px-2 uppercase tracking-widest text-foreground-lighter">
                   <span>{fields[field.name].label}</span>
                   <FieldLength
                     max={fields[field.name].max}
@@ -138,7 +149,7 @@ export function Edit(initial: ProfileOutput) {
                   <Textarea
                     autoComplete="off"
                     placeholder="Tell us about yourself"
-                    className="border border-border peer resize-none p-2 rounded-md min-h-20"
+                    className="peer min-h-20 resize-none rounded-md border border-border p-2"
                     minLength={fields[field.name].min}
                     maxLength={fields[field.name].max}
                     {...field}
@@ -151,12 +162,11 @@ export function Edit(initial: ProfileOutput) {
         />
         <Button
           aria-disabled={pending}
-          size="sm"
-          className="gap-2 rounded-full disabled:opacity-75"
+          size="md"
+          className="self-start"
           type="submit"
           fill="primary"
         >
-          <Save className="size-4" />
           {pending ? "Saving.." : "Save"}
         </Button>
       </form>

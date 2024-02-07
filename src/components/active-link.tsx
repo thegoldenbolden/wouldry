@@ -1,29 +1,38 @@
 "use client";
-import { Link, type LinkProps } from "~/components/ui/link";
 import { usePathname } from "next/navigation";
+import { Link, type LinkProps } from "~/components/ui/link";
 import { cn } from "~/lib/utils";
 
-type Props = LinkProps &
-  React.PropsWithChildren<{
-    href: string;
+type Props = Omit<LinkProps, "className"> & {
+  rootPath?: string;
+  className: {
+    default?: string;
     active?: string;
     inactive?: string;
-    parent?: string;
-  }>;
+  };
+};
 
 export function ActiveLink({
-  className = "",
-  active = "",
-  inactive = "",
-  parent,
+  rootPath = "",
+  className = {
+    default: "",
+    active: "",
+    inactive: "",
+  },
   ...props
 }: Props) {
   const pathname = usePathname();
-  const isActive = pathname === props.href || parent === pathname;
-  const style = cn(className, { [active]: isActive, [inactive]: !isActive });
+  const active = pathname === props.href || rootPath === pathname;
+
   return (
-    <Link data-active={isActive} className={style} {...props}>
-      {props.children}
-    </Link>
+    <Link
+      data-active={active}
+      className={cn(
+        "group",
+        className.default,
+        active ? className.active : className.inactive,
+      )}
+      {...props}
+    />
   );
 }

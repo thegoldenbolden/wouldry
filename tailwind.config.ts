@@ -1,21 +1,18 @@
-import { screens } from "tailwindcss/defaultTheme";
 import type { Config } from "tailwindcss";
+import { fontFamily, screens } from "tailwindcss/defaultTheme";
 
 const config: Config = {
-  content: [
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
+  content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
+  darkMode: "class",
   plugins: [
-    require("tailwindcss-animate"),
-    require("@tailwindcss/aspect-ratio"),
     require("@tailwindcss/container-queries"),
+    require("tailwindcss-animate"),
     require("tailwindcss-radix")(),
   ],
   theme: {
     extend: {
       aria: {
-        invalid: 'invalid="true"',
+        invalid: "invalid='true'",
       },
       screens: {
         xs: "320px",
@@ -24,64 +21,56 @@ const config: Config = {
       borderRadius: {
         inherit: "inherit",
       },
+      fontFamily: {
+        sans: ["var(--font-synonym)", ...fontFamily.sans],
+        chillax: ["var(--font-chillax)", ...fontFamily.sans],
+      },
       colors: {
-        primary: "hsl(var(--primary))",
-        "primary-content": "hsl(var(--primary-content))",
-        "primary-dark": "hsl(var(--primary-dark))",
-        "primary-light": "hsl(var(--primary-light))",
-
-        secondary: "hsl(var(--secondary))",
-        "secondary-content": "hsl(var(--secondary-content))",
-        "secondary-dark": "hsl(var(--secondary-dark))",
-        "secondary-light": "hsl(var(--secondary-light))",
-
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
-        border: "hsl(var(--border))",
-
-        copy: "hsl(var(--copy))",
-        "copy-light": "hsl(var(--copy-light))",
-        "copy-lighter": "hsl(var(--copy-lighter))",
-
-        success: "hsl(var(--success))",
-        warning: "hsl(var(--warning))",
-        danger: "hsl(var(--danger))",
-        error: "hsl(var(--error))",
-
-        "success-content": "hsl(var(--success-content))",
-        "warning-content": "hsl(var(--warning-content))",
-        "danger-content": "hsl(var(--danger-content))",
-        "error-content": "hsl(var(--error-content))",
-
-        "rather-blue": "hsl(var(--rather-blue))",
-        "rather-blue-content": "hsl(var(--rather-blue-content))",
-
-        "rather-red": "hsl(var(--rather-red))",
-        "rather-red-content": "hsl(var(--rather-red-content))",
-      },
-      animation: {
-        logo: "logo 3s infinite forwards",
-      },
-      keyframes: {
-        logo: {
-          "0%": {
-            strokeDashoffset: "1.5em",
-            strokeDasharray: "1.5em",
-          },
-          "25%, 75%": {
-            strokeDashoffset: "2.25em",
-            strokeWidth: "0.01em",
-          },
-          "50%": {
-            strokeDasharray: "3em",
-          },
-          "100%": {
-            strokeDashOffset: "-1.5em",
-            strokeDashArray: "1.5em",
-          },
+        blue: {
+          DEFAULT: "hsl(var(--blue))",
+          foreground: "hsl(var(--blue-foreground))",
+        },
+        red: {
+          DEFAULT: "hsl(var(--red))",
+          foreground: "hsl(var(--red-foreground))",
+        },
+        background: {
+          DEFAULT: "hsl(var(--background))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+        border: {
+          DEFAULT: "hsl(var(--border))",
+          foreground: "hsl(var(--border-foreground))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+        },
+        error: {
+          DEFAULT: "hsl(var(--error))",
+          foreground: "hsl(var(--error-foreground))",
+        },
+        foreground: {
+          DEFAULT: "hsl(var(--foreground))",
+          light: "hsl(var(--foreground-light))",
+          lighter: "hsl(var(--foreground-lighter))",
+        },
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+          dark: "hsl(var(--primary-dark))",
+          light: "hsl(var(--primary-light))",
         },
       },
     },
   },
 };
+
 export default config;

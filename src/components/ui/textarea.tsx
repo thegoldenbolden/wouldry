@@ -8,7 +8,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
     return (
       <textarea
         className={cn(
-          "bg-transparent aria-invalid:focus-visible:outline-error focus-visible:z-10 focus-visible:outline focus-visible:outline-primary focus-visible:outline-offset-1 disabled:cursor-not-allowed disabled:opacity-50",
+          "bg-transparent focus-visible:z-10 focus-visible:outline focus-visible:outline-offset-1 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:focus-visible:outline-error",
           className,
         )}
         ref={ref}

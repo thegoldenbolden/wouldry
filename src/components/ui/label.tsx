@@ -1,7 +1,7 @@
 "use client";
 
-import type { ComponentProps } from "react";
 import dynamic from "next/dynamic";
+import type { ComponentProps } from "react";
 import { cn } from "~/lib/utils";
 
 const Root = dynamic(() => import("@radix-ui/react-label").then((m) => m.Root));
@@ -11,7 +11,7 @@ function Label({ className, ref, ...props }: ComponentProps<typeof Root>) {
     <Root
       ref={ref}
       className={cn(
-        "text-xs font-semibold tracking-widest uppercase",
+        "text-xs font-semibold uppercase tracking-widest",
         className,
       )}
       {...props}

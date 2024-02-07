@@ -1,257 +1,104 @@
-"use client";
-
-import { useCommentMutation } from "~/components/comment/use-mutation";
-import { Button, type ButtonProps } from "~/components/ui/button";
-import { valibotResolver } from "@hookform/resolvers/valibot";
-import { RelativeDate } from "~/components/relative-date";
-import { Textarea } from "~/components/ui/textarea";
-import { createAvatarBorder } from "~/lib/utils";
 import { Avatar } from "~/components/avatar";
+import { RelativeDate } from "~/components/format/date";
 import { Link } from "~/components/ui/link";
-import { useForm } from "react-hook-form";
+import { NO_NAME } from "~/lib/constants";
 import { links } from "~/lib/links";
-import { useState } from "react";
-import { toast } from "sonner";
+import { cn } from "~/lib/utils";
 
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  type DialogTriggerProps,
-} from "~/components/ui/dialog";
-
-import {
-  CreateCommentOutput,
-  CreateCommentSchema,
-  fields,
-} from "~/lib/validate/comment";
-
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormErrorMessage,
-} from "~/components/ui/form";
-
-type ReplyProps = ButtonProps & {
-  contentId: string;
-  comment?: {
-    id: string;
-    createdAt: Date;
-    author: {
-      username: string;
-      image: string;
-      accentColor: string;
-      name: string;
-    } | null;
-    body: string;
-  } | null;
-};
-
-export function Reply({ comment, contentId, children, ...props }: ReplyProps) {
-  const Message = () => {
-    if (!comment) {
-      return null;
-    }
-
-    return (
-      <div className="py-6 flex flex-col gap-2">
-        <div className="flex flex-wrap gap-2 items-center">
-          <div className="flex grow items-end gap-2">
-            <Avatar
-              style={createAvatarBorder(comment.author?.accentColor)}
-              className="size-6 rounded-full"
-              src={comment.author?.image}
-              alt={comment.author?.username || "An"}
-            />
-            {comment.author ? (
-              <Link
-                className="inline"
-                text="copy"
-                href={links.profile.href(comment.author.username)}
-              >
-                {comment.author.name}
-              </Link>
-            ) : (
-              <span>Anonymous</span>
-            )}
-          </div>
-          <RelativeDate ago={false} date={comment.createdAt} style="narrow" />
-        </div>
-        <p>{comment.body}</p>
-      </div>
-    );
-  };
-
-  const form = useForm({
-    reValidateMode: "onChange",
-    resolver: valibotResolver(CreateCommentSchema),
-    defaultValues: {
-      [fields.body.name]: "",
-      [fields.contentId.name]: contentId,
-    },
-  });
-
-  const mutation = useCommentMutation();
-  const [open, setOpen] = useState(false);
-
-  const onSubmit = async (values: CreateCommentOutput) => {
-    if (mutation.isPending) return;
-
-    toast.promise(
-      async () => {
-        await mutation.mutateAsync({
-          type: "add",
-          ...values,
-          ...(comment && { parentId: comment.id }),
-        });
-        form.reset();
-        setOpen(false);
-      },
-      {
-        loading: "Adding comment..",
-        error: "There was an error comment",
-      },
-    );
-  };
-
+function CommentRoot({ className, ...props }: React.ComponentProps<"article">) {
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger
-        className="p-1 rounded-sm"
-        ghost="primary"
-        title="Reply"
-        {...props}
-      >
-        {children}
-      </DialogTrigger>
-      <DialogContent className="max-w-lg truncate w-full">
-        <DialogTitle className="sr-only">Add Comment</DialogTitle>
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="py-4 px-2 flex text-ellipsis overflow-hidden w-full flex-col divide-border divide-y gap-3"
-          >
-            <DialogHeader className="flex flex-row items-center justify-between">
-              <DialogClose
-                text="copy"
-                title="Cancel"
-                className="hover:no-underline rounded-sm"
-              >
-                Cancel
-              </DialogClose>
-              <Button
-                fill="primary"
-                className="px-5 rounded-full py-1"
-                type="submit"
-              >
-                Reply
-              </Button>
-            </DialogHeader>
-            <Message />
-            <FormField
-              name={fields.body.name}
-              control={form.control}
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <FormLabel className="sr-only">add a comment</FormLabel>
-                  <div className="flex flex-col gap-2">
-                    <FormControl>
-                      <Textarea
-                        className="w-full p-2 grow rounded-sm outline-border outline outline-1 transition-all hover:outline-2 focus-visible:outline-2"
-                        required
-                        placeholder={!comment ? "Add a comment.." : "Reply.."}
-                        aria-required
-                        autoComplete="off"
-                        minLength={fields[field.name].min}
-                        maxLength={fields[field.name].max}
-                        {...field}
-                      />
-                    </FormControl>
-                    <div className="flex justify-between">
-                      <FormErrorMessage />
-                      <span className="ml-auto">
-                        {fields[field.name].max - field.value.length}
-                      </span>
-                    </div>
-                  </div>
-                </FormItem>
-              )}
-            />
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+    <article {...props} className={cn("flex flex-col gap-2", className)} />
   );
 }
 
-type MoreProps = DialogTriggerProps & {
-  commentId: string;
-  contentId: string;
-  owner: boolean;
+type CommentAvatarProps = Omit<React.ComponentProps<typeof Avatar>, "alt"> & {
+  image?: string | null;
+  username?: string | null;
+  alt?: string | null;
 };
-
-export function More({
-  children,
-  commentId,
-  owner,
-  contentId,
+function CommentAvatar({
+  className,
+  image,
+  username,
   ...props
-}: MoreProps) {
-  const [open, setOpen] = useState(false);
-  const close = () => setOpen(false);
-
-  const mutation = useCommentMutation();
-
-  if (!owner) {
-    // TODO: Remove once I add more than a delete action
-    return null;
-  }
-
+}: CommentAvatarProps) {
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger title="More" {...props}>
-        {children}
-      </DialogTrigger>
-      <DialogContent className="flex overflow-clip max-w-xs flex-col gap-0 p-0 divide-y divide-border">
-        <Button
-          size="sm"
-          ghost="copy"
-          className="justify-center"
-          onClick={() => {
-            toast.promise(
-              async () => {
-                await mutation.mutateAsync({
-                  type: "delete",
-                  commentId,
-                  contentId,
-                });
-                close();
-              },
-              {
-                loading: "Deleting comment..",
-                error: "Failed to delete comment",
-                success: "Deleted comment",
-              },
-            );
-          }}
-        >
-          Delete
-        </Button>
-        <Button
-          size="sm"
-          ghost="copy"
-          className="justify-center"
-          onClick={close}
-        >
-          Cancel
-        </Button>
-      </DialogContent>
-    </Dialog>
+    <Avatar
+      {...props}
+      className={cn("size-9 min-w-9 rounded-md", className)}
+      src={image}
+      alt={username || NO_NAME}
+    />
   );
 }
+
+function CommentContent({ className, ...props }: React.ComponentProps<"div">) {
+  return <div {...props} className={cn("flex flex-col gap-2", className)} />;
+}
+
+type CommentDateProps = React.ComponentProps<typeof RelativeDate>;
+function CommentDate({ className, ...props }: CommentDateProps) {
+  return (
+    <RelativeDate
+      ago={false}
+      style="narrow"
+      className={cn("ml-auto text-sm text-foreground-light", className)}
+      {...props}
+    />
+  );
+}
+
+type CommentAuthorProps = Partial<{
+  username: string | null;
+  nickname: string | null;
+}>;
+function CommentAuthor({ username, nickname }: CommentAuthorProps) {
+  return (
+    <div className="truncate">
+      {!username ? (
+        <span>{NO_NAME}</span>
+      ) : (
+        <>
+          <Link
+            className="z-[1] inline p-0 font-semibold text-foreground decoration-2 underline-offset-2 focus-visible:outline-1 focus-visible:outline-offset-0"
+            text="foreground"
+            href={links.profile.href(username)}
+          >
+            {nickname}
+          </Link>
+          &nbsp;
+          <span className="text-sm font-normal text-foreground-light ">
+            @{username}
+          </span>
+        </>
+      )}
+    </div>
+  );
+}
+
+function CommentHeader({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div {...props} className={cn("flex items-center gap-2", className)} />
+  );
+}
+
+type CommentBodyProps = React.ComponentProps<"p">;
+function CommentMessage({ children, className, ...props }: CommentBodyProps) {
+  return (
+    <p
+      {...props}
+      className={cn("overflow-hidden text-ellipsis px-2.5", className)}
+    >
+      {children}
+    </p>
+  );
+}
+
+export const Comment = Object.assign(CommentRoot, {
+  Avatar: CommentAvatar,
+  Content: CommentContent,
+  Author: CommentAuthor,
+  Header: CommentHeader,
+  Message: CommentMessage,
+  Date: CommentDate,
+});

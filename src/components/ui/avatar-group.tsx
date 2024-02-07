@@ -1,5 +1,5 @@
-import { AvatarFallback, AvatarImage, Avatar } from "~/components/ui/avatar";
 import type { ComponentProps } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 
 type Props = ComponentProps<typeof AvatarImage> & {
   size?: number;

@@ -6,3 +6,5 @@ export function Skeleton({ className, ...props }: CardProps) {
     <Card className={cn("motion-safe:animate-pulse", className)} {...props} />
   );
 }
+
+export type SkeletonProps = CardProps;

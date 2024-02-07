@@ -1,8 +1,13 @@
 /** @type {import("prettier").Config} */
-module.exports = {
-  semi: true,
-  trailingComma: "all",
+const prettierConfig = {
   printWidth: 80,
-  plugins: ["prettier-plugin-tailwindcss"],
-  tailwindFunctions: ["clsx", "cva"],
+  semi: true,
+  singleQuote: false,
+  plugins: [
+    "prettier-plugin-organize-imports",
+    "prettier-plugin-tailwindcss"
+  ],
+  tailwindFunctions: ["cva", "clsx"]
 };
+
+module.exports = prettierConfig;

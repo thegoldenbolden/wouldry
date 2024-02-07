@@ -1,24 +1,27 @@
 "use client";
 
-import { usePathname, useSearchParams } from "next/navigation";
-import { Dots, EditMessage, Message } from "~/components/icons";
-import { RelativeDate } from "~/components/relative-date";
-import { MIN_COMMENTS_PER_PAGE } from "~/lib/constants";
-import type { ThreadFilters } from "~/lib/query-keys";
-import { NoResults } from "~/components/no-results";
-import { Reply, More } from "~/components/comment";
-import { LoadMore } from "~/components/load-more";
-import { Spinner } from "~/components/ui/spinner";
-import { createAvatarBorder } from "~/lib/utils";
-import { Avatar } from "~/components/avatar";
-import { Link } from "~/components/ui/link";
+import { useSearchParams } from "next/navigation";
 import { useCallback } from "react";
-import { links } from "~/lib/links";
-
+import { Comment } from "~/components/comment";
+import { More } from "~/components/comment/more";
+import { Reply } from "~/components/comment/reply";
 import {
-  type UseInfiniteComments,
   useInfiniteComments,
+  type UseInfiniteComments,
 } from "~/components/comment/use-infinite";
+import { Chat, ChevronLeft, Dots, Edit, Pencil, X } from "~/components/icons";
+import { LoadMore } from "~/components/load-more";
+import { Button } from "~/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogHeader,
+  DialogTrigger,
+} from "~/components/ui/dialog";
+import { Spinner } from "~/components/ui/spinner";
+import { MIN_COMMENTS_PER_PAGE } from "~/db/validations/comment";
+import type { ThreadFilters } from "~/lib/query-keys";
 
 const KEY = "threadId" as const;
 
@@ -27,12 +30,24 @@ type ContentProps = React.PropsWithChildren<{
   filters: Omit<ThreadFilters, "parentId">;
 }>;
 
+function goTo(threadId: string | null) {
+  if (!window) {
+    return;
+  }
+
+  if (!threadId) {
+    window.history.pushState(null, "", `?${KEY}=all`);
+    return;
+  }
+
+  window.history.pushState(null, "", `?${KEY}=${threadId}`);
+}
+
 export function InfiniteComments({ filters, authenticated }: ContentProps) {
   const searchParams = useSearchParams();
-  const pathname = usePathname();
 
   const commentId = searchParams.get(KEY);
-  const parentId = !commentId ? null : commentId;
+  const parentId = !commentId || commentId === "all" ? null : commentId;
 
   const {
     data,
@@ -45,17 +60,6 @@ export function InfiniteComments({ filters, authenticated }: ContentProps) {
     filters: { ...filters, parentId },
   });
 
-  const createUrl = useCallback(
-    (threadId: string | null) => {
-      if (!threadId) {
-        return pathname;
-      }
-
-      return `${pathname}?${KEY}=${threadId}`;
-    },
-    [pathname],
-  );
-
   const getTopCommentId = useCallback(() => {
     const threads = data?.pages?.[0]?.results?.[0];
     if (!threads?.parent?.id) {
@@ -65,183 +69,178 @@ export function InfiniteComments({ filters, authenticated }: ContentProps) {
   }, [data]);
 
   const isEmpty = status === "success" && !data?.pages?.[0]?.results?.length;
-  const backUrl = isEmpty ? pathname : createUrl(getTopCommentId());
 
   return (
-    <div className="max-w-lg w-full mx-auto">
-      {(parentId || authenticated) && (
-        <div className="flex justify-between py-1.5 items-center">
-          {parentId && (
-            <Link
-              className="rounded-md px-3 py-[2px] hover:bg-copy/5"
-              scroll={false}
-              href={backUrl}
-            >
-              Back
-            </Link>
-          )}
-          {authenticated && (
-            <Reply
-              contentId={filters.contentId}
-              fill="primary"
-              className="ml-auto rounded-md px-3 py-[2px]"
-            >
-              Add Comment
-            </Reply>
-          )}
-        </div>
-      )}
-      <CommentList
-        contentId={filters.contentId}
-        status={status}
-        isEmpty={isEmpty}
-        authenticated={authenticated}
-      >
-        {data?.pages.map((page) => {
-          return page.results.map(({ parent, ...comment }) => {
-            return (
-              <li
-                id={comment.id}
-                className="flex flex-col gap-4 px-3 py-4 text-[15px]"
-                key={comment.id}
-              >
-                {/** Comment Details */}
-                <div className="flex flex-wrap gap-2 items-center">
-                  <div className="flex grow items-end gap-2">
-                    <Avatar
-                      style={createAvatarBorder(comment.author?.accentColor)}
-                      className="size-6 rounded-full"
-                      src={comment.author?.image}
-                      alt={comment.author?.username || "An"}
-                    />
-                    {comment.author ? (
-                      <Link
-                        className="inline"
-                        text="copy"
-                        href={links.profile.href(comment.author.username)}
-                      >
-                        {comment.author.name}
-                      </Link>
-                    ) : (
-                      <span>Anonymous</span>
-                    )}
-                  </div>
-                  {comment.id === commentId && !parent && (
-                    <span className="text-primary uppercase text-sm font-semibold">
-                      OP
-                    </span>
-                  )}
-                  <RelativeDate
-                    ago={false}
-                    date={comment.createdAt}
-                    style="narrow"
-                  />
-                </div>
-                <p className="z-[1] self-start">{comment.body}</p>
-
-                {/** Parent Comment */}
-                {parent && comment.id === commentId && (
-                  <div className="relative p-3 border-border border rounded-md">
-                    {/**styled to prevent nesting links*/}
-                    <Link
-                      scroll={false}
-                      href={createUrl(parent.id)}
-                      className="z-0 block outline-0 focus-visible:outline-0 after:z-0 after:absolute after:h-full after:w-full after:rounded-md after:focus-visible:outline after:focus-visible:outline-primary after:left-0 after:top-0 after:hover:bg-copy/5 after:content-['']"
-                    >
-                      <span className="sr-only">view comment</span>
-                    </Link>
-
-                    <div className="flex flex-col gap-3">
-                      <div className="flex flex-wrap w-full items-center">
-                        <div className="flex grow items-end gap-2">
-                          <Avatar
-                            style={createAvatarBorder(
-                              parent.author?.accentColor,
-                            )}
-                            className="size-6 rounded-full"
-                            src={parent.author?.image}
-                            alt={parent.author?.username || "Anonymous"}
-                          />
-                          {parent.author ? (
-                            <Link
-                              className="inline z-10"
-                              text="copy"
-                              href={links.profile.href(parent.author.username)}
-                            >
-                              {parent.author.name}
-                            </Link>
-                          ) : (
-                            <span>Anonymous</span>
-                          )}
-                        </div>
-                        <RelativeDate
-                          className="text-sm z-10"
-                          ago={false}
-                          date={parent.createdAt}
-                          style="narrow"
-                        />
-                      </div>
-                      <p className="z-10 self-start">{parent.body}</p>
-                    </div>
-                  </div>
-                )}
-
-                {/** Toolbar */}
-                <div className="flex items-center gap-6 z-[1]">
-                  {comment.id !== commentId && (
-                    <Link
-                      scroll={false}
-                      ghost="copy"
-                      title="View"
-                      className="p-1.5 rounded-md"
-                      href={createUrl(comment.id)}
-                    >
-                      <Message />
-                    </Link>
-                  )}
-                  {authenticated && (
-                    <Reply
-                      ghost="copy"
-                      className="p-1.5 rounded-md"
-                      contentId={filters.contentId}
-                      comment={comment}
-                    >
-                      <EditMessage />
-                    </Reply>
-                  )}
-                  <More
-                    commentId={comment.id}
-                    contentId={filters.contentId}
-                    owner={comment.viewer.isOwner}
-                    ghost="copy"
-                    className="p-1.5 rounded-md"
-                  >
-                    <Dots className="size-4" />
-                  </More>
-                </div>
-              </li>
-            );
-          });
-        })}
-        {data?.pages?.[0]?.results.length === MIN_COMMENTS_PER_PAGE && (
-          <LoadMore
-            hasNextPage={hasNextPage}
-            isFetching={isFetching}
-            isFetchingNextPage={isFetchingNextPage}
-            fetchNextPage={fetchNextPage}
-            className="flex items-center justify-center px-3 py-4 text-sm transition-colors"
+    <Dialog defaultOpen={Boolean(parentId)}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <DialogTrigger ghost="border" size="md">
+          View all comments
+        </DialogTrigger>
+        {!authenticated ? null : (
+          <Reply
+            contentId={filters.contentId}
+            fill="primary"
+            size="md"
+            className="ml-auto rounded-md"
           >
-            Load older
-          </LoadMore>
+            Add Comment
+          </Reply>
         )}
-      </CommentList>
-    </div>
+      </div>
+      <DialogContent className="max-h-svh min-h-svh overflow-y-auto border-none p-0 sm:border md:h-[80svh] md:min-h-0">
+        <div className="flex flex-col gap-4 bg-inherit">
+          <DialogHeader className="sticky top-0 z-50 flex flex-row items-center justify-between border-b border-b-border bg-inherit px-3 py-2">
+            {!parentId ? null : (
+              <Button
+                className="items-center gap-2 rounded-md hover:bg-foreground/5"
+                size="icon"
+                title="Back"
+                aria-label="previous page"
+                onClick={() => {
+                  goTo(getTopCommentId());
+                }}
+              >
+                <ChevronLeft />
+              </Button>
+            )}
+            {!authenticated ? null : (
+              <Reply
+                contentId={filters.contentId}
+                fill="primary"
+                size="icon"
+                aria-label="Add comment"
+                className="ml-auto rounded-md"
+                title="add comment"
+              >
+                <Edit />
+              </Reply>
+            )}
+            <DialogClose
+              aria-label="close comments"
+              title="Close comments"
+              className="gap-2 rounded-md hover:bg-foreground/5"
+              size="icon"
+            >
+              <X />
+            </DialogClose>
+          </DialogHeader>
+          <CommentList
+            contentId={filters.contentId}
+            status={status}
+            isEmpty={isEmpty}
+          >
+            {data?.pages.map((page) => {
+              return page?.results.map(({ parent, ...comment }) => {
+                return (
+                  <Comment
+                    key={comment.id}
+                    className="text-ellipsis py-4 text-sm"
+                  >
+                    <Comment.Content>
+                      <Comment.Header>
+                        <Comment.Avatar
+                          image={comment.author?.image}
+                          username={comment.author?.username}
+                          alt={comment.author?.username}
+                          className="size-8 min-w-8 rounded-full"
+                        />
+                        <Comment.Author
+                          nickname={comment.author?.nickname}
+                          username={comment.author?.username}
+                        />
+                        <Comment.Date date={comment.createdAt} />
+                      </Comment.Header>
+                      <Comment.Message>{comment.body}</Comment.Message>
+                      {/** Parent Comment */}
+                      {!parent?.author || comment.id !== commentId ? null : (
+                        <Comment className="group relative my-2 rounded-md border  border-border p-3 sm:ml-0 sm:p-4">
+                          {/**styled to prevent nesting interactive elements*/}
+                          <Button
+                            onClick={() => {
+                              goTo(parent.id);
+                            }}
+                            aria-label="view comment"
+                            className="absolute left-0 top-0 z-[1] h-full w-full focus-visible:outline-offset-0 group-hover:bg-foreground/5"
+                          >
+                            <span className="sr-only">view comment</span>
+                          </Button>
+                          <Comment.Content>
+                            <Comment.Header>
+                              <Comment.Avatar
+                                image={parent?.author?.image}
+                                username={parent?.author?.username}
+                                alt={parent?.author?.username}
+                                className="size-6 min-w-5 rounded-full text-[10px]"
+                              />
+                              <Comment.Author
+                                nickname={parent?.author?.nickname}
+                                username={parent?.author?.username}
+                              />
+                              <Comment.Date date={parent?.createdAt} />
+                            </Comment.Header>
+                            <Comment.Message>{parent?.body}</Comment.Message>
+                          </Comment.Content>
+                        </Comment>
+                      )}
+                      <div className="z-[1] flex items-center gap-6 px-2.5">
+                        {comment.id === commentId ? null : (
+                          <Button
+                            ghost="foreground"
+                            title="View"
+                            className="rounded-md p-1.5"
+                            onClick={() => goTo(comment.id)}
+                          >
+                            <Chat className="size-4" />
+                          </Button>
+                        )}
+                        {!authenticated ? null : (
+                          <Reply
+                            ghost="foreground"
+                            className="group rounded-md p-1.5"
+                            contentId={filters.contentId}
+                            data-active={false}
+                            comment={comment}
+                          >
+                            <Pencil className="size-4" />
+                          </Reply>
+                        )}
+                        <More
+                          commentId={comment.id}
+                          contentId={filters.contentId}
+                          permissions={comment.permissions}
+                          ghost="foreground"
+                          className="rounded-md p-1.5"
+                        >
+                          <Dots className="size-4" />
+                        </More>
+                      </div>
+                    </Comment.Content>
+                  </Comment>
+                );
+              });
+            })}
+            {data?.pages?.[0]?.results.length !==
+            MIN_COMMENTS_PER_PAGE ? null : (
+              <LoadMore
+                hasNextPage={hasNextPage}
+                isFetching={isFetching}
+                isFetchingNextPage={isFetchingNextPage}
+                fetchNextPage={fetchNextPage}
+                className="flex items-center justify-center px-3 py-4 text-sm transition-colors"
+              >
+                Load older
+              </LoadMore>
+            )}
+          </CommentList>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
 export function Disabled() {
   return (
-    <p className="text-center border-t border-border py-4">
+    <p className="border-t border-border py-4 text-center">
       Comments have been disabled.
     </p>
   );
@@ -251,50 +250,30 @@ type CommentListProps = React.PropsWithChildren<{
   status: UseInfiniteComments["status"];
   isEmpty: boolean;
   contentId: string;
-  authenticated: boolean;
 }>;
 
-function CommentList({
-  status,
-  isEmpty,
-  authenticated,
-  children,
-}: CommentListProps) {
+function CommentList({ status, isEmpty, children }: CommentListProps) {
   if (status === "pending") {
     return (
-      <div className="items-center justify-center flex grow flex-col gap-2 p-2">
-        <Spinner />
+      <div className="flex h-full w-full items-center justify-center p-4">
+        <Spinner size="md" color="foreground" />
       </div>
     );
   }
 
   if (status === "error") {
-    return <NoResults>Something unexpected happened</NoResults>;
-  }
-
-  if (isEmpty) {
-    if (authenticated) {
-      return (
-        <p className="text-center border-t border-border py-4">
-          Be the first to leave a comment.
-        </p>
-      );
-    }
-
     return (
-      <p className="text-center border-t border-border py-4">
-        You must&nbsp;
-        <Link title="login" text="primary" href={links.login.href}>
-          login
-        </Link>
-        &nbsp;to comment.
-      </p>
+      <p className="p-4 text-center">An error occurred loading comments</p>
     );
   }
 
+  if (isEmpty) {
+    return <p className="p-4 text-center">Be the first to leave a comment.</p>;
+  }
+
   return (
-    <ul className="flex grow flex-col gap-2 divide-y divide-border">
+    <section className="flex flex-col gap-2 divide-y divide-border px-4">
       {children}
-    </ul>
+    </section>
   );
 }

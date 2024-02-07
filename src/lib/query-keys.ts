@@ -11,11 +11,11 @@ export type ThreadFilters = DefaultFilters<{
   parentId: string | null;
 }>;
 
-export type RatherFilters = DefaultFilters;
+export type PollFilters = DefaultFilters;
 export type UserFilters = DefaultFilters;
 
 export const queryKeys = {
   threads: (filters: ThreadFilters) => ["threads", filters] as const,
   users: (filters: UserFilters) => ["users", filters] as const,
-  rathers: (filters: RatherFilters) => ["rathers", filters] as const,
+  polls: (filters: PollFilters) => ["polls", filters] as const,
 };
