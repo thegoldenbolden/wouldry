@@ -1,7 +1,6 @@
 import {
   coerce,
   fallback,
-  length,
   maxLength,
   maxValue,
   merge,
@@ -59,7 +58,7 @@ export const OAUTH_ID_LENGTH = 21;
 export const SESSION_ID_LENGTH = 21;
 
 export const CreateUserSchema = object({
-  id: string([regex(/[a-zA-Z0-9]{18}/g)]),
+  id: string(),
   image: string(),
   email: string(),
   username: string([
@@ -110,7 +109,7 @@ export const UpdateUserSchema = object({
 });
 
 export const CreateOAuthAccountSchema = object({
-  id: string([regex(/[a-zA-Z0-9]{21}/g)]),
+  id: string(),
   image: string(),
   nickname: string(),
   username: string(),
