@@ -93,7 +93,7 @@ export async function deleteUser(id: string) {
       comments: {
         set: [],
       },
-      rathers: {
+      polls: {
         set: [],
       },
     },

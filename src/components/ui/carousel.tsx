@@ -1,19 +1,22 @@
 "use client";
 
+import * as React from "react";
 import { ChevronLeft, ChevronRight } from "~/components/icons";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
-import * as React from "react";
 
 import useEmblaCarousel, {
-  type EmblaCarouselType as CarouselApi,
-  type EmblaOptionsType as CarouselOptions,
-  type EmblaPluginType as CarouselPlugin,
+  type UseEmblaCarouselType,
 } from "embla-carousel-react";
+
+type CarouselApi = UseEmblaCarouselType[1];
+type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;
+type CarouselOptions = UseCarouselParameters[0];
+type CarouselPlugin = UseCarouselParameters[1];
 
 type CarouselProps = {
   opts?: CarouselOptions;
-  plugins?: CarouselPlugin[];
+  plugins?: CarouselPlugin;
   orientation?: "horizontal" | "vertical";
   setApi?: (api: CarouselApi) => void;
 };
@@ -187,7 +190,7 @@ const CarouselPrevious = React.forwardRef<
   return (
     <Button
       ref={ref}
-      className={cn("size-8 rounded-full", className)}
+      className={cn("size-8 rounded-md", className)}
       disabled={!canScrollPrev}
       onClick={scrollPrev}
       {...props}
@@ -208,23 +211,38 @@ const CarouselNext = React.forwardRef<
   return (
     <Button
       ref={ref}
-      className={cn("size-8 rounded-full", className)}
+      className={cn("size-8 rounded-md", className)}
       disabled={!canScrollNext}
       onClick={scrollNext}
       {...props}
     >
-      <ChevronRight className="size-4" />
+      <ChevronRight className="size-4 px-0 py-0" />
       <span className="sr-only">Next slide</span>
     </Button>
   );
 });
 CarouselNext.displayName = "CarouselNext";
 
+const CarouselHeader = ({ children }: React.PropsWithChildren) => {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-2">
+      <h2 className="flex items-center text-xl font-semibold leading-none">
+        {children}
+      </h2>
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        <CarouselPrevious outline="border" size={null} />
+        <CarouselNext outline="border" size={null} />
+      </div>
+    </div>
+  );
+};
+
 export {
-  type CarouselApi,
   Carousel,
   CarouselContent,
+  CarouselHeader,
   CarouselItem,
-  CarouselPrevious,
   CarouselNext,
+  CarouselPrevious,
+  type CarouselApi,
 };

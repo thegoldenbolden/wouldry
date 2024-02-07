@@ -22,7 +22,7 @@ export function createPage({
   totalItems,
   itemsPerPage,
 }: PageOptions) {
-  const details: { before: string | null; after: string | null } = {
+  const details = {
     before: null,
     after: null,
   };

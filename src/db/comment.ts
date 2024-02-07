@@ -19,7 +19,7 @@ export async function createComment(userId: string, data: CreateCommentOutput) {
           id: userId,
         },
       },
-      rather: {
+      poll: {
         connect: {
           id: data.contentId,
         },
@@ -115,7 +115,7 @@ export async function findComments(data: SearchOutput) {
             nickname: true,
           },
         },
-        rather: {
+        poll: {
           select: {
             author: {
               select: {
@@ -162,9 +162,9 @@ export async function findComments(data: SearchOutput) {
         );
 
         const isForumOwner = Boolean(
-          comment.rather?.author?.id &&
+          comment.poll?.author?.id &&
             session?.user?.id &&
-            comment.rather.author.id === session.user.id,
+            comment.poll.author.id === session.user.id,
         );
 
         return {

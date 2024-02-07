@@ -1,18 +1,16 @@
 "use client";
 
-import { type ThreadFilters, queryKeys } from "~/lib/query-keys";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { search } from "~/actions/comment";
+import { findComments } from "~/actions/comment";
+import { queryKeys, type ThreadFilters } from "~/lib/query-keys";
 
-type Search = Awaited<ReturnType<typeof search>>;
-export type SearchExcludeError = Exclude<Search, { error: string }>;
-
+type SearchComment = Awaited<ReturnType<typeof findComments>>["data"];
 export type UseInfiniteComments = ReturnType<typeof useInfiniteComments>;
 
 export function useInfiniteComments({ filters }: { filters: ThreadFilters }) {
-  const data = useInfiniteQuery<SearchExcludeError>({
+  return useInfiniteQuery<SearchComment>({
     initialPageParam: 0,
-    getNextPageParam: (next) => next.after || undefined,
+    getNextPageParam: (next) => next?.after,
     refetchOnMount: false,
     queryKey: queryKeys.threads(filters),
     queryFn: async ({ pageParam, direction }) => {
@@ -31,15 +29,13 @@ export function useInfiniteComments({ filters }: { filters: ThreadFilters }) {
         searchParams.set("before", pageParam.toString());
       }
 
-      const result = await search(searchParams);
+      const result = await findComments(searchParams);
 
-      if (typeof result.error === "string") {
+      if (result.error) {
         throw result.error;
       }
 
-      return result;
+      return result.data;
     },
   });
-
-  return data;
 }

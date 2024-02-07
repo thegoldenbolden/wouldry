@@ -1,9 +1,9 @@
 "use client";
 
-import { Button, type ButtonVariants } from "~/components/ui/button";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
-import { cn } from "~/lib/utils";
 import React from "react";
+import { Button, type ButtonVariants } from "~/components/ui/button";
+import { cn } from "~/lib/utils";
 
 const Tabs = TabsPrimitive.Root;
 
@@ -50,4 +50,4 @@ const TabsContent = ({
   );
 };
 
-export { Tabs, TabsList, TabsTrigger, TabsContent };
+export { Tabs, TabsContent, TabsList, TabsTrigger };

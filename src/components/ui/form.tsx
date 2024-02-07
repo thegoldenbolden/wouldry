@@ -1,16 +1,16 @@
-import { useContext, createContext, useId, type ComponentProps } from "react";
-import { Label } from "~/components/ui/label";
-import { Info } from "~/components/icons";
 import dynamic from "next/dynamic";
+import { createContext, useContext, useId, type ComponentProps } from "react";
+import { InfoCircle } from "~/components/icons";
+import { Label } from "~/components/ui/label";
 import { cn } from "~/lib/utils";
 
 import {
   Controller,
+  FormProvider,
+  useFormContext,
   type ControllerProps,
   type FieldPath,
   type FieldValues,
-  FormProvider,
-  useFormContext,
 } from "react-hook-form";
 
 const Slot = dynamic(() => import("@radix-ui/react-slot").then((m) => m.Slot));
@@ -133,7 +133,7 @@ function FormDescription({ className, ref, ...props }: ComponentProps<"p">) {
     <p
       ref={ref}
       id={formDescriptionId}
-      className={cn("text-sm tracking-wide", className)}
+      className={cn("py-3", className)}
       {...props}
     />
   );
@@ -153,15 +153,15 @@ function FormErrorMessage({
   }
 
   return (
-    <div className="relative drop-shadow-sm border-l-[3px] border-l-error bg-inherit">
-      <span className="absolute p-1 rounded-full border-[3px] border-error left-0 -translate-x-1/2 z-[1] bg-inherit top-1/2 -translate-y-1/2">
-        <Info className="size-4" />
+    <div className="relative border-l-[3px] border-l-error bg-inherit">
+      <span className="absolute left-0 top-1/2 z-[1] -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-error bg-inherit p-1">
+        <InfoCircle className="size-4" />
       </span>
       <p
         ref={ref}
         id={formMessageId}
         className={cn(
-          "text-sm tracking-wide rounded-r-sm font-medium px-6 py-2 bg-error/50 text-error-content",
+          "rounded-r-sm bg-error/50 px-6 py-2 text-sm font-medium text-error-foreground",
           className,
         )}
         {...props}
@@ -173,13 +173,13 @@ function FormErrorMessage({
 }
 
 export {
-  useFormField,
-  Form,
-  FormItem,
-  FormField,
-  FormLabel,
   FieldLength,
+  Form,
   FormControl,
   FormDescription,
   FormErrorMessage,
+  FormField,
+  FormItem,
+  FormLabel,
+  useFormField,
 };

@@ -9,7 +9,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <input
         className={cn(
-          "bg-transparent w-full aria-invalid:focus-visible:outline-error focus-visible:z-10 focus-visible:outline focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50",
+          "w-full bg-transparent focus-visible:z-10 focus-visible:outline focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:focus-visible:outline-error",
           className,
         )}
         ref={ref}

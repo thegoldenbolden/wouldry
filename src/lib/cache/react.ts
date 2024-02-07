@@ -1,59 +1,70 @@
 import "server-only";
 
-import { getProfileByUsername } from "~/db/user/get-profile-by-username";
-import { getRather as findRather } from "~/db/rather/get-rather";
-import { StrippedUsername } from "~/lib/validate/user";
+import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
-import { getEmail } from "~/db/user/get-email";
-import { NumberSchema } from "~/lib/validate";
-import { links } from "~/lib/links";
-import { safeParse } from "valibot";
-import { auth } from "~/lib/auth";
 import { cache } from "react";
+import { safeParse } from "valibot";
+import { getPoll as findPoll } from "~/db/poll";
+import { getEmail, getProfileByUsername } from "~/db/user";
+import { NumberSchema } from "~/db/validations";
+import { StrippedAtSignUsername } from "~/db/validations/user";
+import { lucia } from "~/lib/auth";
+import { links } from "~/lib/links";
 
-export const getSession = cache(() => auth());
+export const getUser = cache(async () => {
+  const sessionId = cookies().get(lucia.sessionCookieName)?.value ?? null;
+  if (!sessionId) {
+    return null;
+  }
 
-export type TRather = Awaited<ReturnType<typeof getRather>>;
-export const getRather = cache(async (number: string | undefined) => {
+  const { user } = await lucia.validateSession(sessionId);
+  return user;
+});
+
+export type TPoll = Awaited<ReturnType<typeof getPoll>>;
+export const getPoll = cache(async (number: string | undefined) => {
   const parsed = safeParse(NumberSchema, { number });
   if (!parsed.success) {
-    return notFound();
+    notFound();
   }
 
-  const response = await findRather(parsed.output).catch((e) => null);
-  if (!response) {
-    return notFound();
+  const response = await findPoll(parsed.output);
+
+  if (!response?.data) {
+    notFound();
   }
 
-  return response;
+  return response.data;
 });
 
 export const getProfile = cache(async (username: string) => {
   const atSignUsername = decodeURIComponent(username);
-  const validated = safeParse(StrippedUsername, atSignUsername);
+  const validated = safeParse(StrippedAtSignUsername, atSignUsername);
 
   if (!validated.success) {
-    return notFound();
+    notFound();
   }
 
-  const [profile, session] = await Promise.all([
+  const [profile, user] = await Promise.all([
     getProfileByUsername(validated.output),
-    getSession(),
+    getUser(),
   ]);
 
-  if (!profile) {
-    return notFound();
+  if (!profile.data) {
+    notFound();
   }
-
   const owner = Boolean(
-    session?.user && session.user.username === profile.username,
+    user?.username && user.username === profile.data.user.username,
   );
-  return { ...profile, owner };
+
+  return {
+    ...profile.data.user,
+    owner,
+  };
 });
 
 export const isAuthenticated = cache(async () => {
-  const session = await getSession();
-  return Boolean(session?.user);
+  return Boolean(await getUser());
 });
 
 export const getAuthRoute = cache(async () => {
@@ -62,33 +73,33 @@ export const getAuthRoute = cache(async () => {
 });
 
 export const getAuthProfile = cache(async () => {
-  const session = await getSession();
+  const user = await getUser();
 
-  if (!session?.user?.username) {
-    return redirect(links.login.href);
+  if (!user?.username) {
+    redirect(links.login.href);
   }
 
-  const profile = await getProfileByUsername(session.user.username);
+  const profile = await getProfileByUsername(user.username);
 
-  if (!profile) {
-    return redirect(links.login.href);
+  if (!profile.data) {
+    redirect(links.login.href);
   }
 
-  return profile;
+  return profile.data;
 });
 
 export const getAuthDetails = cache(async () => {
-  const session = await getSession();
+  const user = await getUser();
 
-  if (!session?.user?.username) {
-    return redirect(links.login.href);
+  if (!user?.username) {
+    redirect(links.login.href);
   }
 
-  const account = await getEmail(session.user.username);
+  const account = await getEmail(user.username);
 
-  if (!account) {
-    return redirect(links.login.href);
+  if (!account?.data?.user) {
+    redirect(links.login.href);
   }
 
-  return account;
+  return account.data.user;
 });

@@ -1,6 +1,6 @@
-import { AVATAR_COLORS, CLOUDINARY_URL } from "~/lib/constants";
-import { type ClassValue, clsx } from "clsx";
+import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { AVATAR_COLORS, CLOUDINARY_URL } from "~/lib/constants";
 
 export const cn = (...inputs: ClassValue[]) => {
   return twMerge(clsx(inputs));
@@ -12,10 +12,6 @@ export const getRandomNumber = (min: number, max: number) => {
 
 export const getRandomColor = () => {
   return getRandomNumber(0, 16_777_215);
-};
-
-export const getRandomHex = () => {
-  return decimalToHex(getRandomColor());
 };
 
 export const getColor = (color?: number | null) => {
@@ -43,8 +39,20 @@ export const getRandomAvatar = () => {
   };
 };
 
-export const createAvatarBorder = (color?: string) => {
-  return { border: `2px solid ${color || "#1f8fff"}` };
+export const setBorderColor = (color?: string | null) => {
+  return { borderColor: color || "#1f8fff" };
+};
+
+export const getRandomHex = (): `#${string}` => {
+  const alphabet = "0123456789abcdef";
+  let hex = "";
+
+  for (let i = 0; i < 6; i++) {
+    let a = Math.floor(Math.random() * alphabet.length);
+    hex += a;
+  }
+
+  return `#${hex}`;
 };
 
 type Fetcher<JSON = any> = (

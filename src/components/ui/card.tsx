@@ -1,5 +1,5 @@
-import type { ComponentPropsWithRef } from "react";
 import { Slot } from "@radix-ui/react-slot";
+import type { ComponentPropsWithRef } from "react";
 import { cn } from "~/lib/utils";
 
 type CardProps = ComponentPropsWithRef<"div"> & {
@@ -12,7 +12,7 @@ function Card({ className, asChild = false, ref, ...props }: CardProps) {
   return (
     <Comp
       className={cn(
-        "group/card rounded-md drop-shadow-md p-2 bg-background text-copy",
+        "group/card rounded-md bg-card p-2 text-card-foreground",
         className,
       )}
       ref={ref}
@@ -21,4 +21,4 @@ function Card({ className, asChild = false, ref, ...props }: CardProps) {
   );
 }
 
-export { type CardProps, Card };
+export { Card, type CardProps };

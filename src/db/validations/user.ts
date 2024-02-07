@@ -59,7 +59,7 @@ export const OAUTH_ID_LENGTH = 21;
 export const SESSION_ID_LENGTH = 21;
 
 export const CreateUserSchema = object({
-  id: string([length(USER_ID_LENGTH), regex(/[a-zA-Z0-9]{18}/g)]),
+  id: string([regex(/[a-zA-Z0-9]{18}/g)]),
   image: string(),
   email: string(),
   username: string([
@@ -110,7 +110,7 @@ export const UpdateUserSchema = object({
 });
 
 export const CreateOAuthAccountSchema = object({
-  id: string([length(OAUTH_ID_LENGTH), regex(/[a-zA-Z0-9]{21}/g)]),
+  id: string([regex(/[a-zA-Z0-9]{21}/g)]),
   image: string(),
   nickname: string(),
   username: string(),
@@ -121,7 +121,7 @@ export const CreateOAuthAccountSchema = object({
   email: string(),
 });
 
-export const StrippedUsername = transform(
+export const StrippedAtSignUsername = transform(
   string([
     toLowerCase(),
     regex(/^@[a-zA-Z0-9](?!.*[_.]{2})[a-zA-Z0-9._]{0,30}[a-zA-Z0-9]$/),
@@ -162,5 +162,5 @@ export type EmailOutput = Output<typeof EmailSchema>;
 export type OAuthAccountOutput = Output<typeof OAuthAccountSchema>;
 export type UpdateUserOutput = Output<typeof UpdateUserSchema>;
 export type CreateOAuthAccountOutput = Output<typeof CreateOAuthAccountSchema>;
-export type StrippedUsernameOutput = Output<typeof StrippedUsername>;
+export type StrippedAtSignUsernameOutput = Output<typeof StrippedAtSignUsername>;
 export type SearchOutput = Output<typeof SearchSchema>;

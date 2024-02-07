@@ -1,12 +1,11 @@
 "use client";
 
-import { useInfiniteUsers } from "~/components/user/use-users";
-import { MIN_USERS_PER_PAGE } from "~/lib/constants";
-import { NoResults } from "~/components/no-results";
-import type { UserFilters } from "~/lib/query-keys";
-import { User, Fallback } from "~/components/user";
-import { LoadMore } from "~/components/load-more";
 import { useSearchParams } from "next/navigation";
+import { LoadMore } from "~/components/load-more";
+import { User } from "~/components/user";
+import { useInfiniteUsers } from "~/components/user/use-infinite";
+import { MIN_USERS_PER_PAGE } from "~/db/validations/user";
+import type { UserFilters } from "~/lib/query-keys";
 
 export function InfiniteUsers({ filters = {} }: { filters?: UserFilters }) {
   const searchParams = useSearchParams();
@@ -30,38 +29,58 @@ export function InfiniteUsers({ filters = {} }: { filters?: UserFilters }) {
   if (status === "pending") {
     return (
       <div className="flex flex-wrap gap-2">
-        <Fallback className="md:min-w-64" size={MIN_USERS_PER_PAGE} />
+        {Array.from({ length: MIN_USERS_PER_PAGE }).map((_, i) => {
+          return (
+            <User.Fallback
+              className="md:min-w-64"
+              key={`search-users-fallback-${i}`}
+            />
+          );
+        })}
       </div>
     );
   }
 
   if (status === "error") {
-    return <NoResults>Something unexpected happened</NoResults>;
+    return (
+      <p className="text-center text-xl font-bold tracking-wide">
+        Something unexpected happened
+      </p>
+    );
   }
 
   if (status === "success" && !data.pages.length) {
-    return <NoResults>No users found</NoResults>;
+    return (
+      <p className="text-center text-xl font-bold tracking-wide">
+        No users found
+      </p>
+    );
   }
 
   return (
     <>
-      <ul className="flex flex-wrap gap-2">
+      <section className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
         {data.pages.map((page) => {
-          return page.results.map((user) => (
-            <User
-              as="li"
-              key={user.username}
-              user={user}
-              className="list-none drop-shadow-md p-0 basis-0 h-full grow"
-            />
-          ));
+          if (!page) {
+            return null;
+          }
+          return page.results.map((user) => {
+            return (
+              <User
+                key={user.username}
+                user={user}
+                className="h-full grow basis-0 list-none p-0"
+              />
+            );
+          });
         })}
-      </ul>
+      </section>
       <LoadMore
         isFetching={isFetching}
         hasNextPage={hasNextPage}
         isFetchingNextPage={isFetchingNextPage}
         fetchNextPage={fetchNextPage}
+        className="w-auto self-center"
       >
         Load more
       </LoadMore>

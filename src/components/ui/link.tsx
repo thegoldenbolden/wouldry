@@ -1,56 +1,41 @@
 import NextLink, { type LinkProps as NextLinkProps } from "next/link";
-import { type ButtonVariants, Button } from "~/components/ui/button";
 import type { ComponentPropsWithRef } from "react";
+import { buttonVariants, type ButtonVariants } from "~/components/ui/button";
+import { cn } from "~/lib/utils";
 
 export type LinkProps = NextLinkProps &
   ComponentPropsWithRef<"a"> &
   ButtonVariants;
 
-function Link({
+export function Link({
   className,
-  outline,
   fill,
   size,
-  ghost,
   prefetch = false,
+  outline,
   ref,
+  ghost,
   text,
   children,
   ...props
 }: LinkProps) {
+  const cName = cn(
+    buttonVariants({ fill, text, ghost, outline, size }),
+    "p-0",
+    className,
+  );
+
   if (!props.href.startsWith("/")) {
     return (
-      <Button
-        asChild
-        outline={outline}
-        text={text}
-        fill={fill}
-        size={size}
-        ghost={ghost}
-        className={className}
-      >
-        <a ref={ref} {...props}>
-          {children}
-        </a>
-      </Button>
+      <a ref={ref} className={cName} {...props}>
+        {children}
+      </a>
     );
   }
 
   return (
-    <Button
-      asChild
-      outline={outline}
-      text={text}
-      fill={fill}
-      ghost={ghost}
-      size={size}
-      className={className}
-    >
-      <NextLink ref={ref} prefetch={prefetch} {...props}>
-        {children}
-      </NextLink>
-    </Button>
+    <NextLink ref={ref} className={cName} prefetch={prefetch} {...props}>
+      {children}
+    </NextLink>
   );
 }
-
-export { Link };

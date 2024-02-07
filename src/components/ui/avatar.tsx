@@ -12,7 +12,7 @@ function Avatar({
   return (
     <AvatarPrimitive.Root
       ref={ref}
-      className={cn("relative overflow-hidden rounded-md size-10", className)}
+      className={cn("relative size-10 overflow-hidden rounded-md", className)}
       {...props}
     />
   );
@@ -49,7 +49,7 @@ function AvatarFallback({
     <AvatarPrimitive.Fallback
       ref={ref}
       className={cn(
-        "flex h-full w-full p-1 items-center justify-center rounded-inherit bg-background text-copy-light",
+        "flex h-full w-full items-center justify-center bg-background p-1 text-foreground-light",
         className,
       )}
       {...props}
@@ -57,4 +57,4 @@ function AvatarFallback({
   );
 }
 
-export { Avatar, AvatarImage, AvatarFallback };
+export { Avatar, AvatarFallback, AvatarImage };

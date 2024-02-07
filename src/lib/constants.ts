@@ -12,11 +12,5 @@ export const AVATAR_COLORS: Record<number, string> = {
   7: "#f402bf",
 };
 
-export const MAX_USERS_PER_PAGE = 24;
-export const MIN_USERS_PER_PAGE = 12;
-
-export const MAX_COMMENTS_PER_PAGE = 24;
-export const MIN_COMMENTS_PER_PAGE = 12;
-
-export const MAX_RATHERS_PER_PAGE = 24;
-export const MIN_RATHERS_PER_PAGE = 12;
+export const NO_NAME = "Anonymous";
+export const BRAND_NAME = "Wouldry";

@@ -1,9 +1,9 @@
 "use client";
 
 import type { AlertDialogPortalProps } from "@radix-ui/react-alert-dialog";
-import { Button, type ButtonProps } from "~/components/ui/button";
-import type { ComponentProps } from "react";
 import dynamic from "next/dynamic";
+import type { ComponentProps } from "react";
+import { Button, type ButtonProps } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
 const AlertDialog = dynamic(() =>
@@ -49,7 +49,7 @@ function AlertDialogOverlay({
     <Overlay
       ref={ref}
       className={cn(
-        "fixed inset-0 z-50 bg-black/50 radix-state-open:animate-in radix-state-closed:animate-out radix-state-closed:fade-out-0 radix-state-open:fade-in-0",
+        "fixed inset-0 z-50 bg-black/50 radix-state-closed:animate-out radix-state-closed:fade-out-0 radix-state-open:animate-in radix-state-open:fade-in-0",
         className,
       )}
       {...props}
@@ -68,21 +68,13 @@ function AlertDialogContent({
       <Content
         ref={ref}
         className={cn(
-          "fixed left-1/2 overflow-auto max-h-svh top-1/2 z-50 w-full md:max-w-sm -translate-x-1/2 -translate-y-1/2 gap-4 border border-solid border-border bg-background p-6 duration-200 radix-state-open:animate-in radix-state-closed:animate-out radix-state-closed:fade-out-0 radix-state-open:fade-in-0 radix-state-closed:zoom-out-95 radix-state-open:zoom-in-95 radix-state-closed:slide-out-to-left-1/2 radix-state-closed:slide-out-to-top-[48%] radix-state-open:slide-in-from-left-1/2 radix-state-open:slide-in-from-top-[48%]",
+          "fixed left-1/2 top-1/2 z-50 max-h-svh w-full -translate-x-1/2 -translate-y-1/2 gap-4 overflow-auto border border-solid border-border bg-background p-6 duration-200 radix-state-closed:animate-out radix-state-closed:fade-out-0 radix-state-closed:zoom-out-95 radix-state-closed:slide-out-to-left-1/2 radix-state-closed:slide-out-to-top-[48%]  radix-state-open:animate-in radix-state-open:fade-in-0 radix-state-open:zoom-in-95 radix-state-open:slide-in-from-left-1/2 radix-state-open:slide-in-from-top-[48%] md:max-w-sm",
           className,
         )}
         {...props}
       />
     </AlertDialogPortal>
   );
-}
-
-function AlertDialogHeader({ className, ...props }: ComponentProps<"div">) {
-  return <div className={cn("flex flex-col gap-2", className)} {...props} />;
-}
-
-function AlertDialogFooter({ className, ...props }: ComponentProps<"div">) {
-  return <div className={cn(className)} {...props} />;
 }
 
 function AlertDialogTitle({
@@ -192,12 +184,10 @@ function AlertDialogCancel({
 
 export {
   AlertDialog,
-  AlertDialogCancel,
   AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogTitle,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTrigger,
   AlertDialogDescription,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 };

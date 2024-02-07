@@ -1,61 +1,60 @@
 "use client";
 
-import {
-  AlertDialogCancel,
-  AlertDialogFooter,
-} from "~/components/ui/alert-dialog";
-import { useFormState, useFormStatus } from "react-dom";
-import { Button } from "~/components/ui/button";
-import { deleteUser } from "~/actions/user";
+import { FormEvent, useTransition } from "react";
 import { toast } from "sonner";
+import { deleteUser } from "~/actions/user";
+import { AlertDialogCancel } from "~/components/ui/alert-dialog";
+import { Button } from "~/components/ui/button";
 
-export function DeleteAccount({
-  children,
-  ...props
-}: React.ComponentProps<"form">) {
-  const { pending } = useFormStatus();
+export function DeleteAccount(props: React.ComponentProps<"form">) {
+  const [pending, startTransition] = useTransition();
 
-  const [_, action] = useFormState(async () => {
-    if (pending) return;
+  function onSubmit(e: FormEvent) {
+    e.preventDefault();
+    startTransition(() => {
+      if (pending) {
+        return;
+      }
 
-    toast.promise(
-      async () => {
-        const response = await deleteUser();
+      toast.promise(
+        async () => {
+          const response = await deleteUser();
 
-        if (response?.error) {
-          throw response.error;
-        }
-      },
-      {
-        loading: "Deleting...",
-        error: "Failed to delete account",
-        success: "Successfully deleted your account",
-      },
-    );
-  }, undefined);
+          if (response?.error) {
+            throw response.error;
+          }
+        },
+        {
+          loading: "Deleting...",
+          error: "Failed to delete account",
+          success: "Successfully deleted your account",
+        },
+      );
+    });
+  }
 
   return (
     <form
-      action={action}
+      onSubmit={onSubmit}
       className="flex flex-wrap items-center justify-between gap-6"
       {...props}
     >
-      {children}
-      <AlertDialogFooter className="flex items-center w-full gap-4 flex-wrap">
+      {props.children}
+      <div className="flex w-full flex-wrap items-center gap-4">
         <AlertDialogCancel
-          outline="copy"
-          className="rounded-sm basis-0 grow py-1.5"
+          ghost="border"
+          className="grow basis-0 rounded-md py-1.5"
         >
           Cancel
         </AlertDialogCancel>
         <Button
           aria-disabled={pending}
           fill="danger"
-          className="rounded-sm basis-0 grow py-1.5"
+          className="grow basis-0 rounded-md py-1.5"
         >
           Delete
         </Button>
-      </AlertDialogFooter>
+      </div>
     </form>
   );
 }

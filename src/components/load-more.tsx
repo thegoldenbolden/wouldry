@@ -1,7 +1,7 @@
-import { Button, type ButtonProps } from "~/components/ui/button";
-import { useInView } from "react-intersection-observer";
-import { Spinner } from "~/components/ui/spinner";
 import { useEffect } from "react";
+import { useInView } from "react-intersection-observer";
+import { Button, type ButtonProps } from "~/components/ui/button";
+import { Spinner } from "~/components/ui/spinner";
 
 type LoadMoreProps = ButtonProps & {
   hasNextPage: boolean;
@@ -37,12 +37,13 @@ export function LoadMore({
       ref={ref}
       disabled={!hasNextPage || isFetchingNextPage || isFetching}
       onClick={load}
-      size="sm"
+      size="md"
+      ghost="border"
       className="flex w-full items-center justify-center"
       {...props}
     >
       {isFetchingNextPage || isFetching ? (
-        <Spinner />
+        <Spinner size="sm" color="foreground" />
       ) : hasNextPage ? (
         props.children
       ) : (

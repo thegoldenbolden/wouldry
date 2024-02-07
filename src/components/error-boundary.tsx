@@ -1,13 +1,12 @@
 "use client";
 
-import { Button } from "~/components/ui/button";
 import type { ComponentProps } from "react";
-import { cn } from "~/lib/utils";
-
 import {
   ErrorBoundary as ReactErrorBoundary,
   useErrorBoundary,
 } from "react-error-boundary";
+import { Button } from "~/components/ui/button";
+import { cn } from "~/lib/utils";
 
 type ErrorBoundaryProps = ComponentProps<"div"> & {
   fallback?: JSX.Element;
@@ -33,12 +32,18 @@ export function Fallback({ children, ...props }: ComponentProps<"div">) {
       <div
         {...props}
         className={cn(
-          "flex flex-col items-center justify-center gap-3",
+          "flex flex-col items-center justify-center gap-4",
           props.className,
         )}
       >
-        <p>Something went wrong</p>
-        <Button className="font-normal" onClick={() => resetBoundary()}>
+        <p className="font-chillax text-lg font-medium leading-none">
+          Something went wrong
+        </p>
+        <Button
+          className="py-1"
+          outline="foreground"
+          onClick={() => resetBoundary()}
+        >
           Try again?
         </Button>
       </div>
@@ -48,7 +53,13 @@ export function Fallback({ children, ...props }: ComponentProps<"div">) {
   return (
     <div {...props}>
       {children}
-      <button onClick={() => resetBoundary()}>Try again?</button>
+      <Button
+        className="py-1"
+        outline="foreground"
+        onClick={() => resetBoundary()}
+      >
+        Try again?
+      </Button>
     </div>
   );
 }

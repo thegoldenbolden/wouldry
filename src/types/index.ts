@@ -1,16 +1,16 @@
-export type ErrorProps = {
-  error: Error & { digest?: string };
-  reset: () => void;
-};
+export type TupleUnion<U extends string, R extends any[] = []> = {
+  [S in U]: Exclude<U, S> extends never
+    ? [...R, S]
+    : TupleUnion<Exclude<U, S>, [...R, S]>;
+}[U];
 
-type RouteParams<T extends string> = { params: Record<T, string> };
-export type ProviderRoute = RouteParams<"provider">;
-export type UsernameRoute = RouteParams<"username">;
-export type NumberRoute = RouteParams<"number">;
-export type IdRoute = RouteParams<"id">;
-
-export type ApiResponse<T> = {
-  before: string | null;
-  after: string | null;
-  results: T[];
-};
+export type ActionResponse<T> =
+  | {
+      data: T;
+    }
+  | {
+      data: never;
+      error: {
+        message: string;
+      };
+    };
