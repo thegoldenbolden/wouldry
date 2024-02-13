@@ -25,16 +25,10 @@ export async function createPoll(userId: string, data: CreatePollOutput) {
       },
       options: {
         createMany: {
-          data: [
-            {
-              id: generateId(21),
-              value: data.option_one,
-            },
-            {
-              id: generateId(21),
-              value: data.option_two,
-            },
-          ],
+          data: data.options.map((option) => ({
+            id: generateId(21),
+            value: option.value,
+          })),
         },
       },
     },
@@ -126,9 +120,9 @@ export async function deletePoll(authorId: string, data: IdOutput) {
 
   return {
     data: {
-      poll
-    }
-  }
+      poll,
+    },
+  };
 }
 
 export async function getPoll(data: NumberOutput | IdOutput) {
@@ -166,7 +160,7 @@ export async function getPoll(data: NumberOutput | IdOutput) {
 
   if (!poll) {
     return {
-      data: null
+      data: null,
     };
   }
 
@@ -186,8 +180,8 @@ export async function getPoll(data: NumberOutput | IdOutput) {
           },
         };
       }),
-    }
-  }
+    },
+  };
 }
 
 export async function getPolls(
