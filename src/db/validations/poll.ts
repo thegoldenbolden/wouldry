@@ -6,6 +6,7 @@ import {
 import { fields as user } from "./user";
 
 import {
+  array,
   boolean,
   coerce,
   fallback,
@@ -46,18 +47,12 @@ export const fields = {
     pattern: `^[a-z0-9\\-]{1,50}$`,
     tips: `Link must only contain alphanumeric characters, hypens and must be between 2-50 characters in length`,
   },
-  option_one: {
-    name: "option_one",
-    label: "option one",
-    max: 80,
-    min: 2,
-    regex: /^[\w\d\-.,!?&():'" ]{1,80}$/,
-    pattern: `^[a-zA-Z0-9.,!?&():'"\\- ]{1,80}$`,
-  },
-  option_two: {
+  options: {
     name: "option_two",
     label: "option two",
     max: 80,
+    maxOptions: 4,
+    minOptions: 2,
     min: 2,
     regex: /^[\w\d\-.,!?&():'" ]{1,80}$/,
     pattern: `^[a-zA-Z0-9.,!?&():'"\\- ]{1,80}$`,
@@ -87,24 +82,23 @@ export const CreatePollSchema = object({
       "Valid characters: a-z A-Z 0-9 . , ! ? & ( ) : ' \" -",
     ),
   ]),
-  option_one: string([
-    toTrimmed(),
-    minLength(fields.option_one.min, minErrorMessage(fields.option_one.min)),
-    maxLength(fields.option_one.max, maxErrorMessage(fields.option_one.max)),
-    regex(
-      fields.option_one.regex,
-      "Valid characters: a-z A-Z 0-9 . , ! ? & ( ) : ' \" -",
-    ),
-  ]),
-  option_two: string([
-    toTrimmed(),
-    minLength(fields.option_two.min, minErrorMessage(fields.option_two.min)),
-    maxLength(fields.option_two.max, maxErrorMessage(fields.option_two.max)),
-    regex(
-      fields.option_two.regex,
-      "Valid characters: a-z A-Z 0-9 . , ! ? & ( ) : ' \" -",
-    ),
-  ]),
+  options: array(
+    object({
+      value: string([
+        toTrimmed(),
+        minLength(fields.options.min, minErrorMessage(fields.options.min)),
+        maxLength(fields.options.max, maxErrorMessage(fields.options.max)),
+        regex(
+          fields.options.regex,
+          "Valid characters: a-z A-Z 0-9 . , ! ? & ( ) : ' \" -",
+        ),
+      ]),
+    }),
+    [
+      minLength(fields.options.minOptions),
+      maxLength(fields.options.maxOptions),
+    ],
+  ),
   description: optional(
     string([
       toTrimmed(),
@@ -163,10 +157,7 @@ export const SearchSchema = merge([
     ),
     limit: optional(
       coerce(
-        number([
-          minValue(MIN_POLLS_PER_PAGE),
-          maxValue(MAX_POLLS_PER_PAGE),
-        ]),
+        number([minValue(MIN_POLLS_PER_PAGE), maxValue(MAX_POLLS_PER_PAGE)]),
         Number,
       ),
       MIN_POLLS_PER_PAGE,
@@ -174,6 +165,7 @@ export const SearchSchema = merge([
   }),
 ]);
 
-export type CreatePollOutput = Output<typeof CreatePollSchema> & Output<typeof SlugSchema>;
+export type CreatePollOutput = Output<typeof CreatePollSchema> &
+  Output<typeof SlugSchema>;
 export type CreateVoteOutput = Output<typeof CreateVoteSchema>;
 export type SearchOutput = Output<typeof SearchSchema>;
